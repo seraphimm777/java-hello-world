@@ -16,17 +16,17 @@ pipeline {
             }
         }
 
-        stage('Sonar Scan') {
-            steps {
-                withSonarQubeEnv('sonar-server') {
-                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1.2184:sonar'
-                }
-            }
-        }
-
         stage('Unit Test & Build') {
             steps {
                 sh 'mvn clean package'
+            }
+        }
+
+        stage('Sonar Scan') {
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1.2184:sonar -Dsonar.java.binaries=target/classes'
+                }
             }
         }
 
@@ -40,7 +40,6 @@ pipeline {
     post {
         always {
             junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
-            publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'target/site/jacoco/', reportFiles: 'index.html', reportName: 'Code Coverage Report'])
         }
     }
 }
